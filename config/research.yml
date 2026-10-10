@@ -1,0 +1,33 @@
+# ============================================================
+# 研究流程配置
+#
+# 这些参数共同构成三道「防失控」闸门：
+#   1. max_iterations  —— 研究轮次上限（缺口检查最多再追问几轮）
+#   2. recursion_limit —— LangGraph 层面的硬顶，任何意外的边循环都会被它拦住
+#   3. max_concurrency —— 并行检索分支数上限
+# ============================================================
+
+# ---------- 持久化 ----------
+# memory —— InMemorySaver，进程内，零依赖，开发用。**进程退出即忘**
+# sqlite —— SqliteSaver，落盘到 data/checkpoints/research.sqlite
+#
+# 改成 sqlite 之后才能演示这两个能力：
+#   · 断点续跑：跑一半 Ctrl+C，用 --resume 接着跑
+#   · 跨进程查看历史：graph.get_state_history(config)
+checkpointer: sqlite
+
+# ---------- 循环控制（成本闸门）----------
+max_iterations: 2            # 研究轮次上限：首轮 + 最多 2 轮追问
+recursion_limit: 60          # LangGraph 硬顶，防止任何意外的边循环把进程跑死
+
+# ---------- 检索规模 ----------
+max_results_per_query: 5     # 每个子问题搜几条
+extract_top_k: 3             # 前几条去抽取网页正文（Tavily extract 是主要花费）
+max_chars_per_page: 6000     # 单页正文截断长度（控制 checkpoint 体积和 token）
+
+# ---------- 并发 ----------
+max_concurrency: 5           # Send 并行分支的线程池大小
+
+# ---------- 规划 ----------
+min_sub_questions: 3
+max_sub_questions: 5

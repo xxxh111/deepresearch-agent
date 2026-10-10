@@ -1,0 +1,43 @@
+# ============================================================
+# DeepResearch Agent 依赖
+#
+# 本项目使用 conda 环境 D:\anaconda\envs\langgraph (Python 3.13)
+# 该环境已预装全部核心依赖，通常无需重新安装。
+# 本文件用于在其他机器上复现环境：pip install -r requirements.txt
+# ============================================================
+
+# ---------- LangGraph 核心 ----------
+langgraph==1.1.2
+langgraph-checkpoint==4.2.0
+langgraph-checkpoint-sqlite==3.1.1
+langgraph-prebuilt==1.0.8
+langgraph-sdk==0.3.9
+
+# ---------- LangChain 核心 ----------
+langchain==1.2.12
+langchain-core==1.2.18
+langchain-classic==1.0.2
+
+# ---------- 模型接入 ----------
+langchain-deepseek==1.0.1
+langchain-openai==1.1.11
+langchain-anthropic==1.3.4
+dashscope==1.25.6
+
+# ---------- 工具与搜索 ----------
+langchain-tavily==0.2.17
+
+# ---------- 可观测性 ----------
+langsmith==0.12.6
+
+# ---------- 工具库 ----------
+python-dotenv==1.2.1
+pydantic==2.12.5
+pyyaml
+rich
+
+# ---------- UI ----------
+streamlit==1.65.0
+
+# ---------- 测试 ----------
+pytest

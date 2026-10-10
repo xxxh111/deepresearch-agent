@@ -1,0 +1,7 @@
+{
+  "dependencies": ["."],
+  "graphs": {
+    "deepresearch": "./graph/build.py:build_graph"
+  },
+  "env": ".env"
+}

@@ -1,0 +1,75 @@
+# ============================================================
+# Tavily 搜索配置
+#
+# 免费额度 1000 credits/月。
+# 一篇报告（5 子问题）约消耗 5 次 search + 15 次 extract ≈ 20 credits，
+# 即每月约 40 篇。
+# ============================================================
+
+# ---------- 搜索 ----------
+# basic | advanced —— advanced 更准但更贵
+search_depth: advanced
+
+# general | news —— 只有明确问「最近/最新/今年」的时事问题才用 news，
+# 用错会显著降低召回率
+topic: general
+
+max_results: 5
+
+# ---------- 正文抽取（这里有个 26 倍的成本差异，别改错）----------
+#
+# 实测对照（同一个 CSDN 页面，body content 长度）：
+#   整页抽取（不传 query）               → 54,085 字符，开头是"CSDN首页 博客 下载 社区"导航栏
+#   传 query + chunks_per_source=3      →  2,106 字符，开头就是正文
+#
+# 结论：**必须传 query**。Tavily 会按查询相关性只返回最相关的若干片段，
+# 而不是把整页（含导航、侧栏、评论区）都吐出来。
+#
+# 这个参数的影响是全局的：它同时决定了 token 成本、checkpoint 体积和证据质量。
+extract:
+  # 每个网页返回几个最相关的片段。3 段约 2k 字符，够提炼出证据了；
+  # 调大会线性增加 token 成本，收益递减。
+  chunks_per_source: 3
+
+  # basic | advanced —— 用 advanced，别用 basic。
+  #
+  # 实测（同一个 LangGraph 官方文档页面）：
+  #     basic     → 抽取失败，返回字符串 "No extracted results found for ..."
+  #     advanced  → 成功，返回 2228 字符正文
+  #
+  # 原因是现代文档站大量使用 JS 渲染，basic 抓不到内容。
+  # 而抽取失败意味着这次 fetch_page 完全白调 —— 模型决定读这个页面的成本已经付了，
+  # 拿不回内容才是最大的浪费。所以这里宁可贵一点。
+  extract_depth: advanced
+
+  # markdown | text
+  format: markdown
+
+  # 每个页面最多保留多少字符（兜底护栏）。
+  # chunks_per_source 已经控制住了长度，这里是防止某个页面异常膨胀。
+  max_chars_per_page: 8000
+
+# 每个子问题最多抽取几个网页的正文
+extract_top_k: 3
+
+# ---------- 降级策略（配额耗尽 / 网络不通时）----------
+retry_attempts: 2            # 429/超时 的指数退避重试次数
+degrade_to_snippet: true     # 重试仍失败则只用搜索摘要，并把 evidence 的 confidence 标为 low
+
+# ---------- 网络 ----------
+# 如果 api.tavily.com 直连不通，在这里填自定义端点（或用 .env 里的 HTTPS_PROXY）
+# api_base_url: https://api.tavily.com
+timeout: 30
+
+# ============================================================
+# 两个实测发现的坑（写 tools/search_tools.py 时会遇到）
+# ============================================================
+#
+# 1. TavilySearch 和 TavilyExtract 对"缺 API key"的处理不一致：
+#      TavilySearch   → 构造器静默通过，调用时才炸
+#      TavilyExtract  → 构造器直接抛 ValidationError
+#    所以不能靠"能不能构造成功"来判断 key 配好了没，必须在工具里显式检查。
+#
+# 2. TavilySearch 的 raw_content 默认是 None，要用得传 include_raw_content=True。
+#    但既然我们有更省钱的 TavilyExtract（按查询抽片段），
+#    保持 raw_content=False、只用 content 字段（摘要）即可。

@@ -1,0 +1,36 @@
+# 密钥（绝不入库）
+#
+# 注意要覆盖所有变体 —— 只写 .env 的话，.env.bak / .env.local /
+# .env.production 这些都会漏进去。这类文件一旦推上去，
+# 就算立刻删除，GitHub 的缓存和 fork 里也还留着。
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# 虚拟环境
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+
+# 运行产物
+logs/
+data/checkpoints/*.sqlite
+data/checkpoints/*.sqlite-wal
+data/checkpoints/*.sqlite-shm
+data/cache/
+reports/*.md
+
+# 保留目录占位
+!reports/.gitkeep
+!data/checkpoints/.gitkeep

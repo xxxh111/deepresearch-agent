@@ -1,0 +1,49 @@
+# ============================================================
+# 模型配置
+#
+# 设计要点：
+#   1. provider 可插拔 —— 换模型只改这里的 provider 字段（或用环境变量 LLM_PROVIDER 覆盖）
+#   2. 角色化温度 —— planner/gap_checker 要确定性（0.0），writer 要文采（0.4）
+#   3. 模型名不写死在代码里 —— 模型换代只改本文件
+# ============================================================
+
+# 默认 provider，可被环境变量 LLM_PROVIDER 覆盖
+provider: deepseek
+
+# ---------- 各角色的参数覆盖 ----------
+# 结构化输出类节点（planner / gap_checker / summarize）一律 0.0，
+# 因为我们要的是稳定可解析的 JSON，不是创意。
+roles:
+  planner:
+    temperature: 0.0
+  researcher:
+    temperature: 0.0
+  summarize:
+    temperature: 0.0
+  gap_checker:
+    temperature: 0.0
+  writer:
+    temperature: 0.4      # 报告需要可读性，给一点温度
+  qa:
+    temperature: 0.2
+
+# ---------- provider 注册表 ----------
+providers:
+  deepseek:
+    model: deepseek-v4-flash
+    # 关键：关闭思考模式。
+    # 开着的话，结构化输出会落进 reasoning_content 而 content 为空，
+    # 导致 with_structured_output 直接解析失败。
+    thinking: disabled
+    max_retries: 2
+
+  qwen:
+    model: qwen3-max
+    # 通义千问走 OpenAI 兼容端点（不要用已进入弃用轨道的 langchain_community.ChatTongyi）
+    base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+    api_key_env: DASHSCOPE_API_KEY
+    max_retries: 2
+
+  openai:
+    model: gpt-4.1-mini
+    max_retries: 2

@@ -1,0 +1,17 @@
+# ============================================================
+# 提示词文件映射
+#
+# 提示词全部外置成 prompts/*.txt，不进代码。
+# 沿用你 Agent项目 的 prompts.yml 约定，但路径改成相对项目根。
+#
+# 缓存提示：DeepSeek 有自动前缀缓存（KV cache）。
+# 每个提示词文件都遵循「固定不变的说明在前，变量数据在后」的排列，
+# 这样同一角色多次调用时前缀能命中缓存，token 成本显著下降。
+# ============================================================
+
+planner: prompts/planner.txt
+researcher_search: prompts/researcher_search.txt
+summarize_evidence: prompts/summarize_evidence.txt
+gap_checker: prompts/gap_checker.txt
+writer: prompts/writer.txt
+qa_followup: prompts/qa_followup.txt
